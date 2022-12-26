@@ -1,0 +1,653 @@
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/CMakeLists.txt	2022-12-26 19:03:06.963896710 +0100
+@@ -20,6 +20,8 @@
+ 
+ set(VCOS_PTHREADS_BUILD_SHARED TRUE)
+ 
++include(GNUInstallDirs)
++
+ include(makefiles/cmake/global_settings.cmake)
+ include(makefiles/cmake/arm-linux.cmake)
+ include(makefiles/cmake/vmcs.cmake)
+@@ -125,7 +127,7 @@
+ 	foreach(PCFILE bcm_host.pc brcmegl.pc brcmglesv2.pc brcmvg.pc vcsm.pc mmal.pc)
+ 		configure_file("pkgconfig/${PCFILE}.in" "${PCFILE}" @ONLY)
+ 		install(FILES       "${CMAKE_CURRENT_BINARY_DIR}/${PCFILE}"
+-			DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
++			DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+ 	endforeach()
+ endif()
+ # Remove cache entry, if one added by command line
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/containers/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/containers/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/containers/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/containers/CMakeLists.txt	2022-12-26 19:02:35.034871181 +0100
+@@ -66,7 +66,7 @@
+ 
+ add_library(containers ${LIBRARY_TYPE} ${core_SRCS} ${io_SRCS} ${net_SRCS} ${packetizers_SRCS})
+ target_link_libraries(containers vcos)
+-install(TARGETS containers DESTINATION lib)
++install(TARGETS containers DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ set(container_readers)
+ set(container_writers)
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/containers/test/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/containers/test/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/containers/test/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/containers/test/CMakeLists.txt	2022-12-26 19:02:35.034871181 +0100
+@@ -1,17 +1,17 @@
+ # Generate test application
+ add_executable(containers_test test.c)
+ target_link_libraries(containers_test -Wl,--no-whole-archive containers)
+-install(TARGETS containers_test DESTINATION bin)
++install(TARGETS containers_test DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ # Generate test application
+ add_executable(containers_check_frame_int check_frame_int.c)
+ target_link_libraries(containers_check_frame_int -Wl,--no-whole-archive containers)
+-install(TARGETS containers_check_frame_int DESTINATION bin)
++install(TARGETS containers_check_frame_int DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ # Generate autotest application
+ #add_executable(containers_autotest autotest.cpp crc_32.c)
+ #target_link_libraries(containers_autotest -Wl,--no-whole-archive containers})
+-#install(TARGETS containers_autotest DESTINATION bin)
++#install(TARGETS containers_autotest DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ # Helper code to provide non-blocking console input
+ if (WIN32)
+@@ -28,39 +28,39 @@
+ # Generate net test applications
+ add_executable(containers_stream_client stream_client.c ${NB_IO_SOURCE})
+ target_link_libraries(containers_stream_client containers)
+-install(TARGETS containers_stream_client DESTINATION bin)
++install(TARGETS containers_stream_client DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ add_executable(containers_stream_server stream_server.c)
+ target_link_libraries(containers_stream_server containers)
+-install(TARGETS containers_stream_server DESTINATION bin)
++install(TARGETS containers_stream_server DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ add_executable(containers_datagram_sender datagram_sender.c)
+ target_link_libraries(containers_datagram_sender containers)
+-install(TARGETS containers_datagram_sender DESTINATION bin)
++install(TARGETS containers_datagram_sender DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ add_executable(containers_datagram_receiver datagram_receiver.c)
+ target_link_libraries(containers_datagram_receiver containers)
+-install(TARGETS containers_datagram_receiver DESTINATION bin)
++install(TARGETS containers_datagram_receiver DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ add_executable(containers_rtp_decoder rtp_decoder.c ${NB_IO_SOURCE})
+ target_link_libraries(containers_rtp_decoder containers)
+-install(TARGETS containers_rtp_decoder DESTINATION bin)
++install(TARGETS containers_rtp_decoder DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ # Generate URI test application
+ add_executable(containers_test_uri test_uri.c)
+ target_link_libraries(containers_test_uri containers)
+-install(TARGETS containers_test_uri DESTINATION bin)
++install(TARGETS containers_test_uri DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ # Generate URI pipe application
+ add_executable(containers_uri_pipe uri_pipe.c ${NB_IO_SOURCE})
+ target_link_libraries(containers_uri_pipe containers)
+-install(TARGETS containers_uri_pipe DESTINATION bin)
++install(TARGETS containers_uri_pipe DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ # Generate bit stream test application
+ add_executable(containers_test_bits test_bits.c)
+ target_link_libraries(containers_test_bits containers)
+-install(TARGETS containers_test_bits DESTINATION bin)
++install(TARGETS containers_test_bits DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ # Generate packet file dump application
+ add_executable(containers_dump_pktfile dump_pktfile.c)
+-install(TARGETS containers_dump_pktfile DESTINATION bin)
++install(TARGETS containers_dump_pktfile DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/helpers/dtoverlay/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/helpers/dtoverlay/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/helpers/dtoverlay/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/helpers/dtoverlay/CMakeLists.txt	2022-12-26 19:02:35.038204413 +0100
+@@ -22,4 +22,4 @@
+ 
+ target_link_libraries(dtovl fdt)
+ 
+-install (TARGETS dtovl DESTINATION lib)
++install (TARGETS dtovl DESTINATION ${CMAKE_INSTALL_LIBDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/dtmerge/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/dtmerge/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/dtmerge/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/dtmerge/CMakeLists.txt	2022-12-26 19:02:35.098202582 +0100
+@@ -17,5 +17,5 @@
+ add_executable(dtmerge dtmerge.c)
+ target_link_libraries(dtmerge dtovl)
+ 
+-install(TARGETS dtmerge RUNTIME DESTINATION bin)
+-install(FILES dtmerge.1 DESTINATION man/man1)
++install(TARGETS dtmerge RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++install(FILES dtmerge.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/dtoverlay/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/dtoverlay/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/dtoverlay/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/dtoverlay/CMakeLists.txt	2022-12-26 19:02:35.098202582 +0100
+@@ -16,12 +16,12 @@
+ 
+ add_executable(dtoverlay dtoverlay_main.c utils.c)
+ target_link_libraries(dtoverlay dtovl)
+-install(TARGETS dtoverlay RUNTIME DESTINATION bin)
+-install(FILES dtoverlay.1 DESTINATION man/man1)
++install(TARGETS dtoverlay RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++install(FILES dtoverlay.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+ 
+ add_custom_command(TARGET dtoverlay POST_BUILD COMMAND ln;-sf;dtoverlay;dtparam)
+-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dtparam DESTINATION bin)
+-install(FILES dtparam.1 DESTINATION man/man1)
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dtparam DESTINATION ${CMAKE_INSTALL_BINDIR})
++install(FILES dtparam.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+ 
+ set(DTOVERLAY_SCRIPTS dtoverlay-pre dtoverlay-post)
+-install(PROGRAMS ${DTOVERLAY_SCRIPTS} DESTINATION bin)
++install(PROGRAMS ${DTOVERLAY_SCRIPTS} DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/gencmd/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/gencmd/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/gencmd/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/gencmd/CMakeLists.txt	2022-12-26 19:02:35.098202582 +0100
+@@ -16,5 +16,5 @@
+ 
+ add_executable(vcgencmd gencmd.c)
+ target_link_libraries(vcgencmd vcos vchiq_arm vchostif)
+-install(TARGETS vcgencmd RUNTIME DESTINATION bin)
+-install(FILES vcgencmd.1 DESTINATION man/man1)
++install(TARGETS vcgencmd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++install(FILES vcgencmd.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_audio/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_audio/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_audio/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_audio/CMakeLists.txt	2022-12-26 19:02:35.041537644 +0100
+@@ -5,4 +5,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_dispmanx/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_dispmanx/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_dispmanx/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_dispmanx/CMakeLists.txt	2022-12-26 19:02:35.044870876 +0100
+@@ -5,4 +5,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_encode/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_encode/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_encode/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_encode/CMakeLists.txt	2022-12-26 19:02:35.044870876 +0100
+@@ -5,4 +5,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_font/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_font/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_font/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_font/CMakeLists.txt	2022-12-26 19:02:35.048204108 +0100
+@@ -6,4 +6,4 @@
+ target_link_libraries(${EXEC} vgfont freetype z)
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_jpeg/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_jpeg/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_jpeg/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_jpeg/CMakeLists.txt	2022-12-26 19:02:35.048204108 +0100
+@@ -5,4 +5,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_teapot/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_teapot/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_teapot/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_teapot/CMakeLists.txt	2022-12-26 19:02:35.051537339 +0100
+@@ -5,4 +5,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_tiger/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_tiger/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_tiger/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_tiger/CMakeLists.txt	2022-12-26 19:02:35.051537339 +0100
+@@ -6,4 +6,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_triangle/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_triangle/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_triangle/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_triangle/CMakeLists.txt	2022-12-26 19:02:35.054870571 +0100
+@@ -5,4 +5,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_triangle2/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_triangle2/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_triangle2/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_triangle2/CMakeLists.txt	2022-12-26 19:02:35.054870571 +0100
+@@ -5,4 +5,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_video/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_video/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_video/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_video/CMakeLists.txt	2022-12-26 19:02:35.058203802 +0100
+@@ -5,4 +5,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_videocube/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_videocube/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_videocube/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_videocube/CMakeLists.txt	2022-12-26 19:02:35.058203802 +0100
+@@ -5,4 +5,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_world/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_world/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/hello_pi/hello_world/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/hello_pi/hello_world/CMakeLists.txt	2022-12-26 19:02:35.061537034 +0100
+@@ -5,4 +5,4 @@
+ target_link_libraries(${EXEC} ${HELLO_PI_LIBS})
+ 
+ install(TARGETS ${EXEC}
+-        RUNTIME DESTINATION bin)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/raspicam/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/raspicam/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/raspicam/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/raspicam/CMakeLists.txt	2022-12-26 19:02:35.098202582 +0100
+@@ -66,6 +66,6 @@
+ target_link_libraries(raspivid   ${MMAL_LIBS} vcos bcm_host m)
+ target_link_libraries(raspividyuv   ${MMAL_LIBS} vcos bcm_host m)
+ 
+-install(TARGETS raspistill raspiyuv raspivid raspividyuv RUNTIME DESTINATION bin)
+-install(FILES raspistill.1 raspiyuv.1 raspivid.1 raspividyuv.1 DESTINATION man/man1)
+-install(FILES raspicam.7 DESTINATION man/man7)
++install(TARGETS raspistill raspiyuv raspivid raspividyuv RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++install(FILES raspistill.1 raspiyuv.1 raspivid.1 raspividyuv.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
++install(FILES raspicam.7 DESTINATION ${CMAKE_INSTALL_MANDIR}/man7)
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/smem/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/smem/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/smem/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/smem/CMakeLists.txt	2022-12-26 19:02:35.064870266 +0100
+@@ -16,5 +16,5 @@
+ add_executable(vcsmem smem.c)
+ target_link_libraries(vcsmem vcos vcsm vchostif)
+ 
+-install(TARGETS vcsmem RUNTIME DESTINATION bin)
++install(TARGETS vcsmem RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/tvservice/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/tvservice/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/tvservice/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/tvservice/CMakeLists.txt	2022-12-26 19:02:35.101535813 +0100
+@@ -3,5 +3,5 @@
+ target_link_libraries(tvservice vchostif bcm_host)
+ 
+ install(TARGETS tvservice
+-        RUNTIME DESTINATION bin)
+-install(FILES tvservice.1 DESTINATION man/man1)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++install(FILES tvservice.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/vcmailbox/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/vcmailbox/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/vcmailbox/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/vcmailbox/CMakeLists.txt	2022-12-26 19:02:35.101535813 +0100
+@@ -2,6 +2,6 @@
+ target_link_libraries(vcmailbox vchostif)
+ 
+ install(TARGETS vcmailbox
+-        RUNTIME DESTINATION bin)
+-install(FILES vcmailbox.1 DESTINATION man/man1)
+-install(FILES vcmailbox.7 raspiotp.7 raspirev.7 DESTINATION man/man7)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++install(FILES vcmailbox.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
++install(FILES vcmailbox.7 raspiotp.7 raspirev.7 DESTINATION ${CMAKE_INSTALL_MANDIR}/man7)
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/libs/bcm_host/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/libs/bcm_host/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/libs/bcm_host/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/libs/bcm_host/CMakeLists.txt	2022-12-26 19:02:35.068203497 +0100
+@@ -19,5 +19,5 @@
+ 
+ target_link_libraries(bcm_host vcos vchostif)
+ 
+-install(TARGETS bcm_host DESTINATION lib)
++install(TARGETS bcm_host DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/libs/debug_sym/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/libs/debug_sym/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/libs/debug_sym/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/libs/debug_sym/CMakeLists.txt	2022-12-26 19:02:35.068203497 +0100
+@@ -11,6 +11,6 @@
+ add_library(debug_sym ${SHARED} debug_sym.c)
+ add_library(debug_sym_static STATIC debug_sym.c)
+ 
+-install(TARGETS debug_sym DESTINATION lib)
+-install(TARGETS debug_sym_static DESTINATION lib)
+-install(FILES debug_sym.h DESTINATION include/interface/debug_sym)
++install(TARGETS debug_sym DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS debug_sym_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(FILES debug_sym.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/debug_sym)
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/libs/sm/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/libs/sm/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/libs/sm/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/libs/sm/CMakeLists.txt	2022-12-26 19:02:35.071536729 +0100
+@@ -14,5 +14,5 @@
+ 
+ target_link_libraries(vcsm vcos)
+ 
+-install(TARGETS vcsm DESTINATION lib)
+-install(FILES user-vcsm.h DESTINATION include/interface/vcsm)
++install(TARGETS vcsm DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(FILES user-vcsm.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/vcsm)
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/khronos/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/khronos/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/khronos/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/khronos/CMakeLists.txt	2022-12-26 19:02:35.071536729 +0100
+@@ -78,8 +78,8 @@
+ target_link_libraries(WFC EGL)
+ target_link_libraries(OpenVG EGL)
+ 
+-install(TARGETS EGL GLESv2 OpenVG WFC khrn_client DESTINATION lib)
+-install(TARGETS EGL_static GLESv2_static khrn_static DESTINATION lib)
++install(TARGETS EGL GLESv2 OpenVG WFC khrn_client DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS EGL_static GLESv2_static khrn_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ # recommended names to use to avoid conflicts with mesa libs
+ add_library(brcmEGL ${SHARED} ${EGL_SOURCE})
+@@ -92,4 +92,4 @@
+ target_link_libraries(brcmWFC brcmEGL)
+ target_link_libraries(brcmOpenVG brcmEGL)
+ 
+-install(TARGETS brcmEGL brcmGLESv2 brcmOpenVG brcmWFC DESTINATION lib)
++install(TARGETS brcmEGL brcmGLESv2 brcmOpenVG brcmWFC DESTINATION ${CMAKE_INSTALL_LIBDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/mmal/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/mmal/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/mmal/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/mmal/CMakeLists.txt	2022-12-26 19:02:35.074869960 +0100
+@@ -16,7 +16,7 @@
+ 
+ target_link_libraries(mmal mmal_core mmal_util mmal_vc_client vcos mmal_components)
+ 
+-install(TARGETS mmal DESTINATION lib)
++install(TARGETS mmal DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES
+    mmal.h
+    mmal_buffer.h
+@@ -36,7 +36,7 @@
+    mmal_pool.h mmal_port.h
+    mmal_queue.h
+    mmal_types.h
+-   DESTINATION include/interface/mmal
++   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/mmal
+ )
+ 
+ # Test apps
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/mmal/components/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/mmal/components/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/mmal/components/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/mmal/components/CMakeLists.txt	2022-12-26 19:02:35.074869960 +0100
+@@ -30,5 +30,5 @@
+ target_link_libraries(mmal_components ${container_libs} mmal_util)
+ target_link_libraries(mmal_components mmal_core)
+ 
+-install(TARGETS mmal_components DESTINATION lib)
++install(TARGETS mmal_components DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/mmal/core/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/mmal/core/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/mmal/core/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/mmal/core/CMakeLists.txt	2022-12-26 19:02:35.078203192 +0100
+@@ -13,7 +13,7 @@
+ 
+ target_link_libraries (mmal_core vcos mmal_vc_client)
+ 
+-install(TARGETS mmal_core DESTINATION lib)
++install(TARGETS mmal_core DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES
+    mmal_buffer_private.h
+    mmal_clock_private.h
+@@ -21,5 +21,5 @@
+    mmal_core_private.h
+    mmal_port_private.h
+    mmal_events_private.h
+-   DESTINATION include/interface/mmal/core
++   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/mmal/core
+ )
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/mmal/util/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/mmal/util/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/mmal/util/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/mmal/util/CMakeLists.txt	2022-12-26 19:02:35.078203192 +0100
+@@ -12,7 +12,7 @@
+ 
+ target_link_libraries (mmal_util vcos)
+ 
+-install(TARGETS mmal_util DESTINATION lib)
++install(TARGETS mmal_util DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES
+    mmal_component_wrapper.h
+    mmal_connection.h
+@@ -24,5 +24,5 @@
+    mmal_util.h
+    mmal_util_params.h
+    mmal_util_rational.h
+-   DESTINATION include/interface/mmal/util
++   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/mmal/util
+ )
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/mmal/vc/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/mmal/vc/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/mmal/vc/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/mmal/vc/CMakeLists.txt	2022-12-26 19:02:35.081536424 +0100
+@@ -8,12 +8,12 @@
+ if(BUILD_MMAL_APPS)
+ add_executable(mmal_vc_diag mmal_vc_diag.c)
+ target_link_libraries(mmal_vc_diag mmal mmal_vc_client debug_sym vcos)
+-install(TARGETS mmal_vc_diag RUNTIME DESTINATION bin)
++install(TARGETS mmal_vc_diag RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+ endif(BUILD_MMAL_APPS)
+ 
+ include_directories ( ../../../host_applications/linux/libs/sm )
+ 
+-install(TARGETS mmal_vc_client DESTINATION lib)
++install(TARGETS mmal_vc_client DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES
+    mmal_vc_api.h
+    mmal_vc_api_drm.h
+@@ -22,5 +22,5 @@
+    mmal_vc_msgs.h
+    mmal_vc_opaque_alloc.h
+    mmal_vc_shm.h
+-   DESTINATION include/interface/mmal/vc
++   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/mmal/vc
+ )
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/vchiq_arm/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/vchiq_arm/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/vchiq_arm/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/vchiq_arm/CMakeLists.txt	2022-12-26 19:02:35.081536424 +0100
+@@ -5,7 +5,7 @@
+ # pull in VCHI cond variable emulation
+ target_link_libraries(vchiq_arm vcos)
+ 
+-install(TARGETS vchiq_arm DESTINATION lib)
++install(TARGETS vchiq_arm DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ #install(FILES etc/10-vchiq.rules DESTINATION /etc/udev/rules.d)
+ 
+ include_directories(../..)
+@@ -17,4 +17,4 @@
+                       vchiq_arm
+                       vcos)
+ 
+-install(TARGETS vchiq_test RUNTIME DESTINATION bin)
++install(TARGETS vchiq_test RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/vcos/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/vcos/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/vcos/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/vcos/CMakeLists.txt	2022-12-26 19:02:35.081536424 +0100
+@@ -65,4 +65,4 @@
+    configure_file (build_all.bat.in build_all.bat @ONLY)
+ endif ()
+ 
+-#install (FILES ${HEADERS} DESTINATION include/interface/vcos)
++#install (FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/vcos)
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/vcos/generic/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/vcos/generic/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/vcos/generic/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/vcos/generic/CMakeLists.txt	2022-12-26 19:02:35.084869655 +0100
+@@ -18,4 +18,4 @@
+    configure_file ("${header}" "${VCOS_HEADERS_BUILD_DIR}/generic/${header}" COPYONLY)
+ endforeach ()
+ 
+-install (FILES ${HEADERS} DESTINATION include/interface/vcos/generic)
++install (FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/vcos/generic)
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/vcos/pthreads/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/vcos/pthreads/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/vcos/pthreads/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/vcos/pthreads/CMakeLists.txt	2022-12-26 19:02:35.084869655 +0100
+@@ -42,5 +42,5 @@
+ endif ()
+ 
+ 
+-#install(FILES ${HEADERS} DESTINATION include)
+-install(TARGETS vcos DESTINATION lib)
++#install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++install(TARGETS vcos DESTINATION ${CMAKE_INSTALL_LIBDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/vmcs_host/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/vmcs_host/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/interface/vmcs_host/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/interface/vmcs_host/CMakeLists.txt	2022-12-26 19:02:35.088202887 +0100
+@@ -32,5 +32,5 @@
+ 
+ #target_link_libraries(bufman WFC)
+ 
+-install(TARGETS ${INSTALL_TARGETS} DESTINATION lib)
++install(TARGETS ${INSTALL_TARGETS} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/makefiles/cmake/vmcs.cmake userland-54fd97ae4066a10b6b02089bc769ceed328737e0/makefiles/cmake/vmcs.cmake
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/makefiles/cmake/vmcs.cmake	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/makefiles/cmake/vmcs.cmake	2022-12-26 19:02:35.104869045 +0100
+@@ -13,8 +13,6 @@
+   SET(VMCS_INSTALL_PREFIX "/opt/vc" CACHE PATH "Prefix prepended to install directories" FORCE)
+ endif()
+ 
+-SET(CMAKE_INSTALL_PREFIX "${VMCS_INSTALL_PREFIX}" CACHE INTERNAL "Prefix
+-    prepended to install directories" FORCE)
+ if(NOT DEFINED VMCS_PLUGIN_DIR)
+   SET(VMCS_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}/plugins)
+ endif()
+@@ -52,7 +50,7 @@
+ #install(DIRECTORY interface/khronos/include
+ #        DESTINATION ${VMCS_INSTALL_PREFIX})
+ #install(DIRECTORY interface/vmcs_host/khronos/IL
+-#        DESTINATION ${VMCS_INSTALL_PREFIX}/include)
++#        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ # provide an install script
+ #install(PROGRAMS ${vmcs_root}/makefiles/cmake/scripts/install_vmcs
+ #        DESTINATION ${VMCS_INSTALL_PREFIX}/sbin
+@@ -66,16 +64,16 @@
+ #install(DIRECTORY host_applications/linux/libs/bcm_host/include
+ #        DESTINATION ${VMCS_INSTALL_PREFIX}/)
+ 
+-install(DIRECTORY ${vmcs_root}/interface/vcos      DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/vchiq_arm DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/vchi      DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/vctypes   DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/vcinclude           DESTINATION ${VMCS_INSTALL_PREFIX}/include           FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/peer      DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/vmcs_host DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h" PATTERN "${vmcs_root}/interface/vmcs_host/khronos" EXCLUDE)
++install(DIRECTORY ${vmcs_root}/interface/vcos      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/vchiq_arm DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/vchi      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/vctypes   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/vcinclude           DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}           FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/peer      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/vmcs_host DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h" PATTERN "${vmcs_root}/interface/vmcs_host/khronos" EXCLUDE)
+ 
+-install(DIRECTORY ${vmcs_root}/interface/khronos/include       DESTINATION ${VMCS_INSTALL_PREFIX}     FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/vmcs_host/khronos/IL  DESTINATION ${VMCS_INSTALL_PREFIX}/include     FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/khronos/include/       DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}     FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/vmcs_host/khronos/IL  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}     FILES_MATCHING PATTERN "*.h")
+ 
+-install(DIRECTORY ${vmcs_root}/host_applications/linux/libs/bcm_host/include     DESTINATION ${VMCS_INSTALL_PREFIX}       FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/host_applications/linux/libs/bcm_host/include/     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}       FILES_MATCHING PATTERN "*.h")
+ 
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/middleware/openmaxil/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/middleware/openmaxil/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/middleware/openmaxil/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/middleware/openmaxil/CMakeLists.txt	2022-12-26 19:02:35.091536118 +0100
+@@ -49,4 +49,4 @@
+ 
+ endif ()
+ 
+-install (TARGETS openmaxil DESTINATION lib)
++install (TARGETS openmaxil DESTINATION ${CMAKE_INSTALL_LIBDIR})
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/bcm_host.pc.in userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/bcm_host.pc.in
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/bcm_host.pc.in	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/bcm_host.pc.in	2022-12-26 19:02:35.091536118 +0100
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=@CMAKE_INSTALL_FULL_LIBDIR@
++includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+ 
+ Name: bcm_host
+ Description: Broadcom VideoCore host API library
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/brcmegl.pc.in userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/brcmegl.pc.in
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/brcmegl.pc.in	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/brcmegl.pc.in	2022-12-26 19:02:35.091536118 +0100
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=@CMAKE_INSTALL_FULL_LIBDIR@
++includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+ 
+ Name: brcmEGL
+ Description: Fake brcmEGL package for RPi
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/brcmglesv2.pc.in userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/brcmglesv2.pc.in
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/brcmglesv2.pc.in	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/brcmglesv2.pc.in	2022-12-26 19:02:35.091536118 +0100
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=@CMAKE_INSTALL_FULL_LIBDIR@
++includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+ 
+ Name: brcmGLESv2
+ Description: Fake brcmGLES2 package for RPi
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/brcmvg.pc.in userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/brcmvg.pc.in
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/brcmvg.pc.in	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/brcmvg.pc.in	2022-12-26 19:02:35.094869350 +0100
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=@CMAKE_INSTALL_FULL_LIBDIR@
++includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+ 
+ Name: brcmOpenVG
+ Description: Fake brcmOpenVG package for RPi
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/mmal.pc.in userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/mmal.pc.in
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/mmal.pc.in	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/mmal.pc.in	2022-12-26 19:02:35.094869350 +0100
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=@CMAKE_INSTALL_FULL_LIBDIR@
++includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+ 
+ Name: MMAL
+ Description: Multi-Media Abstraction Layer library for RPi
+diff -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/vcsm.pc.in userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/vcsm.pc.in
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/pkgconfig/vcsm.pc.in	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/pkgconfig/vcsm.pc.in	2022-12-26 19:02:35.094869350 +0100
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=@CMAKE_INSTALL_FULL_LIBDIR@
++includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+ 
+ Name: VCSM
+ Description: VideoCore Shared Memory library for RPi

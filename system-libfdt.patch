@@ -1,0 +1,44 @@
+diff --color -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/CMakeLists.txt	2022-06-16 15:32:08.000000000 +0200
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/CMakeLists.txt	2022-12-23 12:57:35.006169593 +0100
+@@ -112,7 +112,6 @@
+ 
+ # add linux apps
+ add_subdirectory(host_applications/linux)
+-add_subdirectory(opensrc/helpers/libfdt)
+ add_subdirectory(helpers/dtoverlay)
+ 
+ set(vmcs_host_apps_VERSION_MAJOR 1)
+diff --color -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/helpers/dtoverlay/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/helpers/dtoverlay/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/helpers/dtoverlay/CMakeLists.txt	2022-12-22 13:22:49.979285463 +0100
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/helpers/dtoverlay/CMakeLists.txt	2022-12-23 12:57:56.205518918 +0100
+@@ -10,7 +10,6 @@
+ 
+ include_directories (${VIDEOCORE_ROOT}
+                      ${VIDEOCORE_ROOT}/helpers
+-                     ${VIDEOCORE_ROOT}/opensrc/helpers/libfdt
+                      ${VIDEOCORE_HEADERS_BUILD_DIR})
+ 
+ if (CMAKE_COMPILER_IS_GNUCC)
+diff --color -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/dtmerge/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/dtmerge/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/dtmerge/CMakeLists.txt	2022-12-22 13:22:49.979285463 +0100
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/dtmerge/CMakeLists.txt	2022-12-23 12:58:05.028581489 +0100
+@@ -10,7 +10,6 @@
+ include_directories (
+    ${VIDEOCORE_HEADERS_BUILD_DIR}
+    ${VIDEOCORE_ROOT}
+-   ${VIDEOCORE_ROOT}/opensrc/helpers/libfdt
+    ${VIDEOCORE_ROOT}/helpers/dtoverlay
+ )
+ 
+diff --color -ur userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/dtoverlay/CMakeLists.txt userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/dtoverlay/CMakeLists.txt
+--- userland-54fd97ae4066a10b6b02089bc769ceed328737e0.orig/host_applications/linux/apps/dtoverlay/CMakeLists.txt	2022-12-22 13:22:49.979285463 +0100
++++ userland-54fd97ae4066a10b6b02089bc769ceed328737e0/host_applications/linux/apps/dtoverlay/CMakeLists.txt	2022-12-23 12:58:13.938308095 +0100
+@@ -10,7 +10,6 @@
+ include_directories (
+    ${VIDEOCORE_HEADERS_BUILD_DIR}
+    ${VIDEOCORE_ROOT}
+-   ${VIDEOCORE_ROOT}/opensrc/helpers/libfdt
+    ${VIDEOCORE_ROOT}/helpers/dtoverlay
+ )
+ 
