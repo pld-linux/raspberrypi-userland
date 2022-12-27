@@ -15,7 +15,7 @@ BuildRequires:	cmake >= 2.8
 BuildRequires:	libfdt-devel >= 1.6.0
 BuildRequires:	libstdc++-devel
 BuildRequires:	rpmbuild(macros) >= 1.605
-ExclusiveArch:	%{arm}
+ExclusiveArch:	%{arm} aarch64
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		rpiincludedir	%{_includedir}/raspberrypi
@@ -71,7 +71,10 @@ cd build
 %cmake .. \
 	-DCMAKE_INSTALL_INCLUDEDIR:PATH="%{rpiincludedir}" \
 	-DCMAKE_INSTALL_LIBDIR:PATH="%{rpilibdir}" \
-	-DVMCS_PLUGIN_DIR:PATH="%{rpilibdir}/plugins"
+	-DVMCS_PLUGIN_DIR:PATH="%{rpilibdir}/plugins" \
+%ifarch aarch64
+	-DARM64:BOOL=ON
+%endif
 
 %{__make}
 
@@ -79,7 +82,11 @@ cd build
 rm -rf $RPM_BUILD_ROOT
 
 install -d $RPM_BUILD_ROOT/etc/ld.so.conf.d
+%if "%{_lib}" == "lib64"
+echo %{rpilibdir} >$RPM_BUILD_ROOT/etc/ld.so.conf.d/raspberrypi64.conf
+%else
 echo %{rpilibdir} >$RPM_BUILD_ROOT/etc/ld.so.conf.d/raspberrypi.conf
+%endif
 
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
@@ -96,57 +103,68 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n raspberrypi-libs
 %defattr(644,root,root,755)
+%if "%{_lib}" == "lib64"
+%config(noreplace) %verify(not md5 mtime size) /etc/ld.so.conf.d/raspberrypi64.conf
+%else
 %config(noreplace) %verify(not md5 mtime size) /etc/ld.so.conf.d/raspberrypi.conf
+%endif
+%attr(755,root,root) %{rpilibdir}/libbcm_host.so
+%attr(755,root,root) %{rpilibdir}/libdebug_sym.so
+%attr(755,root,root) %{rpilibdir}/libdtovl.so
+%attr(755,root,root) %{rpilibdir}/libvc*.so
+%ifnarch aarch64
 %attr(755,root,root) %{rpilibdir}/libEGL.so
 %attr(755,root,root) %{rpilibdir}/libGLESv2.so
 %attr(755,root,root) %{rpilibdir}/libOpenVG.so
 %attr(755,root,root) %{rpilibdir}/libWFC.so
-%attr(755,root,root) %{rpilibdir}/libbcm_host.so
 %attr(755,root,root) %{rpilibdir}/libbrcm*.so
 %attr(755,root,root) %{rpilibdir}/libcontainers.so
-%attr(755,root,root) %{rpilibdir}/libdebug_sym.so
-%attr(755,root,root) %{rpilibdir}/libdtovl.so
 %attr(755,root,root) %{rpilibdir}/libkhrn_client.so
 %attr(755,root,root) %{rpilibdir}/libmmal*.so
 %attr(755,root,root) %{rpilibdir}/libopenmaxil.so
-%attr(755,root,root) %{rpilibdir}/libvc*.so
+%endif
 
 %files -n raspberrypi-utils
 %defattr(644,root,root,755)
-%attr(755,root,root) %{rpilibdir}/libEGL.so
-%attr(755,root,root) %{_bindir}/containers_*
 %attr(755,root,root) %{_bindir}/dtmerge
 %attr(755,root,root) %{_bindir}/dtoverlay
 %attr(755,root,root) %{_bindir}/dtoverlay-post
 %attr(755,root,root) %{_bindir}/dtoverlay-pre
 %attr(755,root,root) %{_bindir}/dtparam
+%attr(755,root,root) %{_bindir}/tvservice
+%attr(755,root,root) %{_bindir}/vcgencmd
+%attr(755,root,root) %{_bindir}/vchiq_test
+%attr(755,root,root) %{_bindir}/vcmailbox
+%ifnarch aarch64
+%attr(755,root,root) %{_bindir}/containers_*
 %attr(755,root,root) %{_bindir}/mmal_vc_diag
 %attr(755,root,root) %{_bindir}/raspistill
 %attr(755,root,root) %{_bindir}/raspivid
 %attr(755,root,root) %{_bindir}/raspividyuv
 %attr(755,root,root) %{_bindir}/raspiyuv
-%attr(755,root,root) %{_bindir}/tvservice
-%attr(755,root,root) %{_bindir}/vcgencmd
-%attr(755,root,root) %{_bindir}/vchiq_test
-%attr(755,root,root) %{_bindir}/vcmailbox
 %attr(755,root,root) %{_bindir}/vcsmem
 %dir %{rpilibdir}/plugins
 %attr(755,root,root) %{rpilibdir}/plugins/reader_*.so
 %attr(755,root,root) %{rpilibdir}/plugins/writer_*.so
+%endif
 %{_mandir}/man1/dtmerge.1*
 %{_mandir}/man1/dtoverlay.1*
 %{_mandir}/man1/dtparam.1*
+%{_mandir}/man1/tvservice.1*
+%{_mandir}/man1/vcgencmd.1*
+%{_mandir}/man1/vcmailbox.1*
+%ifnarch aarch64
 %{_mandir}/man1/raspistill.1*
 %{_mandir}/man1/raspivid.1*
 %{_mandir}/man1/raspividyuv.1*
 %{_mandir}/man1/raspiyuv.1*
-%{_mandir}/man1/tvservice.1*
-%{_mandir}/man1/vcgencmd.1*
-%{_mandir}/man1/vcmailbox.1*
-%{_mandir}/man7/raspicam.7*
+%endif
 %{_mandir}/man7/raspiotp.7*
 %{_mandir}/man7/raspirev.7*
 %{_mandir}/man7/vcmailbox.7*
+%ifnarch aarch64
+%{_mandir}/man7/raspicam.7*
+%endif
 
 %files -n raspberrypi-devel
 %defattr(644,root,root,755)
@@ -169,7 +187,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n raspberrypi-static
 %defattr(644,root,root,755)
+%{rpilibdir}/libdebug_sym_static.a
+%ifnarch aarch64
 %{rpilibdir}/libEGL_static.a
 %{rpilibdir}/libGLESv2_static.a
-%{rpilibdir}/libdebug_sym_static.a
 %{rpilibdir}/libkhrn_static.a
+%endif
